@@ -1,5 +1,7 @@
 # Liminal Industries mc modded server
 
+Modpack: [Liminal Industries on CurseForge](https://www.curseforge.com/minecraft/modpacks/liminal-industries)
+
 host (tunneled via [playit.gg](https://playit.gg) — no router port forwarding needed):
 
     meltyliminalindustries.playit.plus:44940
@@ -32,6 +34,16 @@ query.port=25566
 (the bundle ships with `25565`, which collides with any other Minecraft server already
 running on this host).
 
+Also edit `bundle/config/voicechat/voicechat-server.properties` and set:
+
+```
+port=24456
+```
+
+(the bundle ships with Simple Voice Chat's default `24454`, which also collides with
+another server's voice chat on this host — the bind failure races with startup and
+kills the whole JVM, not just voice chat, showing up as a boot loop).
+
 `just deploy` chmods `run.sh` executable itself, but if you ever install the unit by hand
 (`sudo install -m 644 systemd/minecraftserver-liminalindustries.service /etc/systemd/system/`), make sure
 `/srv/minecraft/liminalindustries/run.sh` is `+x` first — zip extraction drops the exec bit, which
@@ -40,6 +52,11 @@ shows up as systemd `203/EXEC` on start.
 `just deploy` also overwrites `user_jvm_args.txt` on every deploy, pinning `-Xmx6G -Xms6G`
 regardless of what the bundle shipped with (the default bundle ships it commented out, i.e.
 JVM-default heap). Adjust the value in the `deploy` recipe if the host's RAM changes.
+
+Forge 1.20.1 requires Java 17, but `run.sh` execs bare `java`, which resolves to whatever
+the host's default JVM is. `systemd/minecraftserver-liminalindustries.service` pins
+`PATH=/usr/lib/jvm/java-17-openjdk/bin:...` to force it — without that, a newer default
+JVM makes Mixin crash on boot with `Unsupported class file major version <N>`.
 
 ## Console access
 
@@ -60,6 +77,12 @@ Server commands (`/op`, `/whitelist`, `/say`, etc) go over RCON instead:
 If the game is exposed to the internet, don't also forward the RCON port — connect from a
 shell on the server itself (e.g. over SSH).
 
+## Known issues
+
+- **World renders pitch black on first join.** Not a server bug — log out and back in again,
+  reported to fix it. See
+  [Appocryptha/Liminal-Industries#215](https://github.com/Appocryptha/Liminal-Industries/issues/215#issuecomment-3764003407).
+
 ## specs
 
 - justfile
@@ -69,8 +92,8 @@ shell on the server itself (e.g. over SSH).
 - Forge 1.20.1-47.4.13
 - modded
   - mod bundle is sha256sum verified with a manifest
-- game port `25566`, rcon port `25576` (offset from the defaults so multiple servers can coexist
-  on one host)
+- game port `25566`, rcon port `25576`, voice chat port `24456` (all offset from the defaults so
+  multiple servers can coexist on one host)
 
 ## layout
 

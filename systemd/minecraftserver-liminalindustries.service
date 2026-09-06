@@ -10,6 +10,11 @@ WorkingDirectory=/srv/minecraft/liminalindustries
 # /proc/*/environ for this to tell "server down" from "RCON misconfigured
 # while the server is actually up".
 Environment=MC_SERVER_MARKER=liminalindustries
+# Forge 1.20.1 requires Java 17. run.sh execs bare `java`, so pin PATH here
+# rather than editing run.sh - it's regenerated on every `just extract` from
+# the zip. Without this, the host's default java (26) crashes Mixin with
+# "Unsupported class file major version 70" mid-boot.
+Environment=PATH=/usr/lib/jvm/java-17-openjdk/bin:/usr/bin:/bin
 ExecStart=/srv/minecraft/liminalindustries/run.sh nogui
 Restart=on-failure
 RestartSec=10
