@@ -1,0 +1,10 @@
+*.zip
+*.tar.gz
+/world/
+/mods/
+/libraries/
+/logs/
+/bundle/
+*.jar
+!manifests/*.jar
+__pycache__/

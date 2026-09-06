@@ -1,0 +1,10 @@
+# Lets the `minecraft` service user stop/start its own systemd unit for cold
+# nightly backups (scripts/backup.sh), without granting full sudo access.
+#
+# Install: sudo install -m 440 systemd/minecraft-backup-sudoers /etc/sudoers.d/minecraft-backup-liminalindustries
+#          sudo visudo -c
+#
+# Filename on disk is suffixed with -liminalindustries so it doesn't collide
+# with the sudoers drop-in installed by another server's repo on the same
+# host (e.g. minecraft-backup-buizmcmodded).
+minecraft ALL=(root) NOPASSWD: /usr/bin/systemctl stop minecraftserver-liminalindustries, /usr/bin/systemctl start minecraftserver-liminalindustries

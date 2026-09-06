@@ -1,0 +1,21 @@
+[Unit]
+Description=Liminal Industries modded Minecraft server (Forge 1.20.1-47.4.13)
+After=network.target
+
+[Service]
+User=minecraft
+Group=minecraft
+WorkingDirectory=/srv/minecraft/liminalindustries
+# Inherited by the java child process run.sh execs into; backup.sh scans
+# /proc/*/environ for this to tell "server down" from "RCON misconfigured
+# while the server is actually up".
+Environment=MC_SERVER_MARKER=liminalindustries
+ExecStart=/srv/minecraft/liminalindustries/run.sh nogui
+Restart=on-failure
+RestartSec=10
+# Forge server saves the world and exits cleanly on SIGTERM.
+KillSignal=SIGTERM
+TimeoutStopSec=60
+
+[Install]
+WantedBy=multi-user.target
