@@ -27,9 +27,22 @@ extract:
         rmdir "${entries[0]}"
     fi
 
-# deploy a server bundle (extracted dir containing run.sh, mods/, etc) to /srv/minecraft/liminalindustries
+# deploy a server bundle (extracted dir containing run.sh, mods/, etc) to /srv/minecraft/liminalindustries.
+# --delete only mirrors the mod/config side of things - a routine redeploy
+# with a fresh bundle (no world.tar.gz this time, just an updated mod zip)
+# must not wipe the live world or clobber RCON settings hand-added to the
+# live server.properties. world/, logs, and other server-generated state are
+# excluded from --delete's scope for the same reason.
 deploy src="bundle": (verify-mods src + "/mods")
-    sudo rsync -a --delete "{{src}}/" "{{server_dir}}/"
+    sudo rsync -a --delete \
+        --exclude=/world --exclude=/world_nether --exclude=/world_the_end \
+        --exclude=/logs --exclude=/crash-reports \
+        --exclude=/server.properties --exclude=/eula.txt \
+        --exclude=/whitelist.json --exclude=/ops.json \
+        --exclude=/banned-players.json --exclude=/banned-ips.json \
+        --exclude=/usercache.json --exclude=/usernamecache.json \
+        "{{src}}/" "{{server_dir}}/"
+    [ -f "{{server_dir}}/server.properties" ] || sudo cp "{{src}}/server.properties" "{{server_dir}}/server.properties"
     sudo chown -R minecraft:minecraft "{{server_dir}}"
     sudo chmod +x "{{server_dir}}/run.sh"
     printf -- '-Xmx6G\n-Xms6G\n' | sudo tee "{{server_dir}}/user_jvm_args.txt" >/dev/null
