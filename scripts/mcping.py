@@ -11,6 +11,10 @@ import sys
 
 
 def write_varint(value):
+    # Treat as unsigned 32-bit: the handshake sends protocol version -1 (don't
+    # care) for a status ping, and Python's right-shift sign-extends negative
+    # ints forever instead of terminating like Java/C's fixed-width shift would.
+    value &= 0xFFFFFFFF
     out = b""
     while True:
         byte = value & 0x7F
